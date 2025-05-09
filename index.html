@@ -1,25 +1,33 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Wedding Aquarium</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+  <script src="sketch.js"></script>
   <style>
     body { margin: 0; overflow: hidden; }
-    #controls {
-      position: fixed;
-      bottom: 10px;
-      left: 10px;
-      background: rgba(255,255,255,0.7);
-      padding: 10px;
-      border-radius: 10px;
+    #fish-count {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      color: white;
       font-family: Arial;
+      font-size: 18px;
+      background: rgba(0,0,0,0.5);
+      padding: 10px;
+      border-radius: 5px;
     }
   </style>
 </head>
 <body>
+  <div id="fish-count">0 fish</div>
+  
+  <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-analytics.js";
+    import { getDatabase, ref, onChildAdded } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyA_LZENgeCagnnlWnw1z0rnyGoEeH-tgok",
@@ -30,42 +38,22 @@
       messagingSenderId: "320193570935",
       appId: "1:320193570935:web:d45aeb9ed136ed91733e72",
       measurementId: "G-JY4742WS4K"
-  };
+    };
 
     const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
-  </script>
-  <script src="sketch.js"></script>
-  <script>
-    // Communication channel for instant updates
-    const channel = new BroadcastChannel('aquarium');
-    channel.onmessage = (e) => {
-      if (e.data.type === 'newFish') {
-        addFishFromData(e.data.data);
-      }
-    };
+    const database = getDatabase(app);
     
-    // Check for existing uploads on load
-    window.addEventListener('load', () => {
-      const fishData = localStorage.getItem('newFish');
-      if (fishData) addFishFromData(fishData);
-    });
-    
-    function addFishFromData(dataUrl) {
+    // Listen for new fish added to database
+    onChildAdded(ref(database, 'fishes'), (snapshot) => {
+      const fishData = snapshot.val();
       const img = new Image();
       img.onload = () => {
         const p5Img = createImage(img.width, img.height);
         p5Img.copy(img, 0, 0, img.width, img.height, 0, 0, img.width, img.height);
-        p5Img.resize(200, 0); // Standardize size
-        
-        if (typeof addFishToAquarium === 'function') {
-          addFishToAquarium(p5Img);
-          document.getElementById('fish-count').textContent = 
-            `${fishes.length} fish`;
-        }
+        addFishToAquarium(p5Img);
       };
-      img.src = dataUrl;
-    }
+      img.src = fishData.image;
+    });
   </script>
 </body>
 </html>
