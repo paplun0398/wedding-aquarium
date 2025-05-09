@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Upload Fish</title>
   <link rel="stylesheet" href="style.css">
+  <script src="firebase-init.js"></script>
 </head>
 <body>
   <div class="upload-container">
@@ -19,23 +20,6 @@
   </div>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
-    import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-database.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyA_LZENgeCagnnlWnw1z0rnyGoEeH-tgok",
-      authDomain: "wedding-aquarium.firebaseapp.com",
-      databaseURL: "https://wedding-aquarium-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "wedding-aquarium",
-      storageBucket: "wedding-aquarium.firebasestorage.app",
-      messagingSenderId: "320193570935",
-      appId: "1:320193570935:web:d45aeb9ed136ed91733e72",
-      measurementId: "G-JY4742WS4K"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const database = getDatabase(app);
-    
     const fileInput = document.getElementById('file-input');
     const uploadBtn = document.getElementById('upload-btn');
     const submitBtn = document.getElementById('submit-btn');
