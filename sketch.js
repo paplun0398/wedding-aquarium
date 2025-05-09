@@ -9,6 +9,7 @@ let oceanBg, coralImg, bubbleImg;
 let rippleShader;
 let shaderReady = false;
 let canvas;
+let fishImg;
 
 // ============== PRELOAD ASSETS ==============
 function preload() {
@@ -16,6 +17,7 @@ function preload() {
   oceanBg = loadImage('assets/ocean-bg.jpg');
   coralImg = loadImage('assets/coral.png');
   bubbleImg = loadImage('assets/bubble.png');
+  fishImg = loadImage('assets/fish.png');
   
   // Load shaders using fetch for better error handling
   Promise.all([
@@ -95,11 +97,16 @@ function addFishToAquarium(img) {
 }
 
 function addRandomFish() {
-  let pg = createGraphics(200, 80);
-  pg.fill(random(100,255), random(100,255), random(100,255));
-  pg.ellipse(60, 40, 100, 40); // Body (facing right)
-  pg.triangle(110, 40, 160, 20, 160, 60); // Tail
-  fishes.push(new Fish(pg));
+  let fish = {
+    x: random(width),
+    y: random(height),
+    size: random(30, 70),
+    speed: random(1, 3),
+    color: color(random(100, 255), random(100, 255), random(100, 255)),
+    direction: random([-1, 1]), // Facing left (-1) or right (1)
+    img: fishImg // Reference to the loaded image
+  };
+  fishes.push(fish);
   updateFishCount();
 }
 
