@@ -3,76 +3,109 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Add Fish</title>
+  <title>Upload Fish</title>
   <style>
-    body {
+    body { 
       font-family: Arial, sans-serif;
       margin: 0;
       padding: 20px;
-      background: #2989d8;
+      background: linear-gradient(135deg, #1e5799 0%,#2989d8 100%);
       color: white;
       min-height: 100vh;
       box-sizing: border-box;
+    }
+    
+    .upload-container {
+      background: rgba(0,0,0,0.5);
+      padding: 25px;
+      border-radius: 15px;
+      max-width: 500px;
+      margin: 0 auto;
       text-align: center;
     }
+    
     h1 {
-      font-size: 1.5rem;
-      margin-bottom: 2rem;
+      margin-top: 0;
+      font-size: 24px;
     }
+    
     #preview {
       max-width: 100%;
-      max-height: 50vh;
-      margin: 1rem 0;
-      border-radius: 8px;
+      max-height: 300px;
+      margin: 20px auto;
       display: none;
+      border-radius: 10px;
+      border: 2px dashed rgba(255,255,255,0.3);
     }
-    button {
+    
+    .upload-btn {
       background: white;
       color: #2989d8;
       border: none;
       padding: 12px 24px;
-      font-size: 1rem;
-      border-radius: 25px;
+      font-size: 16px;
+      border-radius: 50px;
       cursor: pointer;
+      font-weight: bold;
       width: 100%;
       max-width: 300px;
-      margin: 0.5rem auto;
+      margin: 10px auto;
       display: block;
-      font-weight: bold;
+      transition: all 0.3s;
     }
-    #upload-btn {
-      background: #4CAF50;
-      color: white;
+    
+    .upload-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    #file-input {
       display: none;
     }
+    
     #status {
-      margin-top: 1rem;
-      min-height: 1.5rem;
+      margin-top: 15px;
+      min-height: 20px;
     }
-    input {
-      display: none;
+    
+    @media (max-width: 480px) {
+      .upload-container {
+        padding: 20px;
+      }
+      
+      h1 {
+        font-size: 20px;
+      }
+      
+      .upload-btn {
+        padding: 10px 20px;
+        font-size: 15px;
+      }
     }
   </style>
 </head>
 <body>
-  <h1>Add Your Fish</h1>
-  <img id="preview" alt="Fish preview">
-  <input type="file" id="file-input" accept="image/*" capture="environment">
-  <button id="select-btn">Select Photo</button>
-  <button id="upload-btn">Upload Fish</button>
-  <div id="status"></div>
+  <div class="upload-container">
+    <h1>Add Your Fish to the Aquarium</h1>
+    <img id="preview" alt="Fish preview">
+    
+    <input type="file" id="file-input" accept="image/*" capture="environment">
+    <button class="upload-btn" id="upload-btn">Choose Photo</button>
+    <button class="upload-btn" id="submit-btn" style="display:none; background:#4CAF50; color:white;">Upload Fish</button>
+    
+    <p id="status"></p>
+  </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
     import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-database.js";
-    import { getStorage, ref as storageRef, uploadBytes } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-storage.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyA_LZENgeCagnnlWnw1z0rnyGoEeH-tgok",
       authDomain: "wedding-aquarium.firebaseapp.com",
       databaseURL: "https://wedding-aquarium-default-rtdb.asia-southeast1.firebasedatabase.app",
       projectId: "wedding-aquarium",
-      storageBucket: "wedding-aquarium.appspot.com",
+      storageBucket: "wedding-aquarium.firebasestorage.app",
       messagingSenderId: "320193570935",
       appId: "1:320193570935:web:d45aeb9ed136ed91733e72",
       measurementId: "G-JY4742WS4K"
@@ -80,60 +113,77 @@
 
     const app = initializeApp(firebaseConfig);
     const database = getDatabase(app);
-    const storage = getStorage(app);
     
     const fileInput = document.getElementById('file-input');
-    const selectBtn = document.getElementById('select-btn');
     const uploadBtn = document.getElementById('upload-btn');
+    const submitBtn = document.getElementById('submit-btn');
     const preview = document.getElementById('preview');
     const status = document.getElementById('status');
     
     let selectedFile = null;
     
-    selectBtn.addEventListener('click', () => fileInput.click());
+    // Handle photo selection
+    uploadBtn.addEventListener('click', () => {
+      fileInput.click();
+    });
     
+    // Preview selected image
     fileInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (file) {
         selectedFile = file;
         preview.src = URL.createObjectURL(file);
         preview.style.display = 'block';
-        uploadBtn.style.display = 'block';
-        selectBtn.style.display = 'none';
+        uploadBtn.style.display = 'none';
+        submitBtn.style.display = 'block';
         status.textContent = "";
       }
     });
     
-    uploadBtn.addEventListener('click', async () => {
+    // Upload to Firebase
+    submitBtn.addEventListener('click', async () => {
       if (!selectedFile) return;
       
-      uploadBtn.disabled = true;
-      status.textContent = "Uploading...";
+      submitBtn.disabled = true;
+      status.textContent = "Uploading your fish...";
       
       try {
-        const storagePath = `fish/${Date.now()}_${selectedFile.name}`;
-        await uploadBytes(storageRef(storage, storagePath), selectedFile);
+        // Convert image to base64
+        const base64Image = await toBase64(selectedFile);
         
+        // Push to Firebase
         await push(ref(database, 'fishes'), {
-          imagePath: storagePath,
+          image: base64Image,
           timestamp: Date.now()
         });
         
-        status.textContent = "Fish added successfully!";
+        status.textContent = "Fish uploaded successfully!";
         preview.style.display = 'none';
         fileInput.value = '';
-        uploadBtn.style.display = 'none';
-        selectBtn.style.display = 'block';
+        submitBtn.style.display = 'none';
+        uploadBtn.style.display = 'block';
         selectedFile = null;
         
-        setTimeout(() => status.textContent = "", 2000);
+        // Reset after 3 seconds
+        setTimeout(() => {
+          status.textContent = "";
+        }, 3000);
       } catch (err) {
-        status.textContent = "Upload failed. Please try again.";
-        console.error(err);
+        status.textContent = "Error: " + err.message;
       } finally {
-        uploadBtn.disabled = false;
+        submitBtn.disabled = false;
       }
     });
+    
+    // Helper function to convert file to base64
+    function toBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+      });
+    }
   </script>
 </body>
 </html>

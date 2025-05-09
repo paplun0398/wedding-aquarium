@@ -5,65 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Wedding Aquarium</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
-  <script>
-    // sketch.js content will go here
-    let fishes = [];
-    let bgImg;
-
-    function preload() {
-      bgImg = loadImage('ocean-bg.png');
-    }
-
-    function setup() {
-      createCanvas(windowWidth, windowHeight);
-      imageMode(CENTER);
-    }
-
-    function draw() {
-      background(bgImg);
-      for (let fish of fishes) {
-        fish.update();
-        fish.display();
-      }
-    }
-
-    function addFishToAquarium(img) {
-      fishes.push(new Fish(img));
-    }
-
-    class Fish {
-      constructor(img) {
-        this.img = img;
-        this.x = random(width);
-        this.y = random(height);
-        this.speed = random(1, 3);
-        this.direction = random([-1, 1]);
-        this.wobble = 0;
-      }
-
-      update() {
-        this.x += this.speed * this.direction;
-        this.wobble += 0.1;
-        
-        if (this.x > width + 50) this.x = -50;
-        if (this.x < -50) this.x = width + 50;
-        
-        this.y += sin(this.wobble) * 0.5;
-      }
-
-      display() {
-        push();
-        translate(this.x, this.y);
-        scale(this.direction, 1);
-        image(this.img, 0, 0, 100, 60);
-        pop();
-      }
-    }
-
-    function windowResized() {
-      resizeCanvas(windowWidth, windowHeight);
-    }
-  </script>
+  <script src="sketch.js"></script>
   <style>
     body { margin: 0; overflow: hidden; }
     #fish-count {
@@ -81,7 +23,8 @@
 </head>
 <body>
   <div id="fish-count">0 fish</div>
-
+  
+  <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
     import { getDatabase, ref, onChildAdded } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-database.js";
@@ -102,25 +45,29 @@
     const database = getDatabase(app);
     const storage = getStorage(app);
     
+    // Listen for new fish added to database
     onChildAdded(ref(database, 'fishes'), async (snapshot) => {
       const fishData = snapshot.val();
       try {
+        // Get the download URL from Firebase Storage
         const imageUrl = await getDownloadURL(storageRef(storage, fishData.imagePath));
         
         const img = new Image();
-        img.crossOrigin = "Anonymous";
         img.onload = () => {
-          const p5Img = createImage(img.width, img.height);
-          p5Img.copy(img, 0, 0, img.width, img.height, 0, 0, img.width, img.height);
-          addFishToAquarium(p5Img);
-          
-          // Update fish count
-          const count = document.getElementById('fish-count');
-          count.textContent = `${parseInt(count.textContent) + 1} fish`;
+          if (typeof addFishToAquarium === 'function') {
+            const p5Img = createImage(img.width, img.height);
+            p5Img.copy(img, 0, 0, img.width, img.height, 0, 0, img.width, img.height);
+            addFishToAquarium(p5Img);
+            
+            // Update fish count
+            const countElement = document.getElementById('fish-count');
+            const currentCount = parseInt(countElement.textContent) || 0;
+            countElement.textContent = `${currentCount + 1} fish`;
+          }
         };
         img.src = imageUrl;
       } catch (error) {
-        console.error('Error loading fish:', error);
+        console.error('Error loading fish image:', error);
       }
     });
   </script>
