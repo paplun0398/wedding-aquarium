@@ -20,7 +20,7 @@ async function preload() {
     coralImg = await loadImage('./assets/decorations/coral.png');
     bubbleImg = await loadImage('./assets/decorations/bubble.png');
     
-    // Load fish template system (NEW)
+    // Load fish template system
     fishConfig = await (await fetch('./assets/templates/fish-config.json')).json();
     fishTemplate = await loadImage(`./assets/templates/${fishConfig.templateImage}`);
     
@@ -51,7 +51,7 @@ function setup() {
     fallbackMsg.style('color', 'white').style('padding', '20px');
   }
   
-  // Initialize with template-based fish (NEW)
+  // Initialize with template-based fish
   initEnvironment();
 }
 
@@ -66,17 +66,17 @@ function initEnvironment() {
     bubbles.push(new Bubble(bubbleImg));
   }
   
-  // Create initial fish using template (NEW)
+  // Create initial fish using template
   for (let i = 0; i < 3; i++) {
-    addFish(fishTemplate, fishConfig);  // Pass config to fish
+    addFish(fishTemplate, fishConfig);
   }
 }
 
 // ============== FISH MANAGEMENT ==============
-function addFish(img, config = null) {  // Updated signature
+function addFish(img, config = null) {
   const newFish = config ? 
-    new Fish(img, config) :  // Template-based fish
-    new Fish(img);           // Legacy fish
+    new Fish(img, config) :
+    new Fish(img);
   
   fishes.push(newFish);
   updateFishCount();
