@@ -1,197 +1,75 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wedding Aquarium</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            background-color: #1a6bb0;
-            font-family: 'Arial', sans-serif;
-        }
-        
-        #aquarium {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            background: linear-gradient(to bottom, #1a6bb0, #0d4b8a);
-            overflow: hidden;
-        }
-        
-        .fish {
-            position: absolute;
-            width: 100px;
-            height: auto;
-            transform-origin: center;
-            transition: transform 0.3s ease;
-            image-rendering: crisp-edges;
-        }
-        
-        .bubble {
-            position: absolute;
-            background-color: rgba(255, 255, 255, 0.4);
-            border-radius: 50%;
-            animation: float 8s infinite ease-in;
-        }
-        
-        .coral {
-            position: absolute;
-            bottom: 0;
-            width: 150px;
-            height: auto;
-        }
-        
-        @keyframes float {
-            0% {
-                transform: translateY(0) translateX(0);
-                opacity: 0;
-            }
-            50% {
-                opacity: 0.8;
-            }
-            100% {
-                transform: translateY(-100vh) translateX(20px);
-                opacity: 0;
-            }
-        }
-        
-        #title {
-            position: absolute;
-            top: 20px;
-            left: 0;
-            right: 0;
-            text-align: center;
-            color: white;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-            z-index: 100;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wedding Aquarium</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+  <script src="sketch.js"></script>
+  <style>
+    body { margin: 0; overflow: hidden; }
+    #fish-count {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      color: white;
+      font-family: Arial;
+      font-size: 18px;
+      background: rgba(0,0,0,0.5);
+      padding: 10px;
+      border-radius: 5px;
+    }
+  </style>
 </head>
 <body>
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.7.1/firebase-storage.js"></script>
+  <div id="fish-count">0 fish</div>
+  
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
+    import { getDatabase, ref, onChildAdded } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-database.js";
+    import { getStorage, ref as storageRef, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-storage.js";
 
-    <script>
-        // Your Firebase config
-        const firebaseConfig = {
-            apiKey: "AIzaSyA_LZENgeCagnnlWnw1z0rnyGoEeH-tgok",
-            authDomain: "wedding-aquarium.firebaseapp.com",
-            databaseURL: "https://wedding-aquarium-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "wedding-aquarium",
-            storageBucket: "wedding-aquarium.firebasestorage.app",
-            messagingSenderId: "320193570935",
-            appId: "1:320193570935:web:d45aeb9ed136ed91733e72",
-            measurementId: "G-JY4742WS4K"
+    const firebaseConfig = {
+      apiKey: "AIzaSyA_LZENgeCagnnlWnw1z0rnyGoEeH-tgok",
+      authDomain: "wedding-aquarium.firebaseapp.com",
+      databaseURL: "https://wedding-aquarium-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "wedding-aquarium",
+      storageBucket: "wedding-aquarium.appspot.com",
+      messagingSenderId: "320193570935",
+      appId: "1:320193570935:web:d45aeb9ed136ed91733e72",
+      measurementId: "G-JY4742WS4K"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+    const storage = getStorage(app);
+    
+    // Listen for new fish added to database
+    onChildAdded(ref(database, 'fishes'), async (snapshot) => {
+      const fishData = snapshot.val();
+      try {
+        // Get the download URL from Firebase Storage
+        const imageUrl = await getDownloadURL(storageRef(storage, fishData.imagePath));
+        
+        const img = new Image();
+        img.onload = () => {
+          if (typeof addFishToAquarium === 'function') {
+            const p5Img = createImage(img.width, img.height);
+            p5Img.copy(img, 0, 0, img.width, img.height, 0, 0, img.width, img.height);
+            addFishToAquarium(p5Img);
+            
+            // Update fish count
+            const countElement = document.getElementById('fish-count');
+            const currentCount = parseInt(countElement.textContent) || 0;
+            countElement.textContent = `${currentCount + 1} fish`;
+          }
         };
-
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const storage = firebase.storage();
-
-        // Create bubbles
-        function createBubbles() {
-            const aquarium = document.getElementById('aquarium');
-            for (let i = 0; i < 20; i++) {
-                const bubble = document.createElement('div');
-                bubble.className = 'bubble';
-                const size = Math.random() * 20 + 10;
-                bubble.style.width = `${size}px`;
-                bubble.style.height = `${size}px`;
-                bubble.style.left = `${Math.random() * 100}vw`;
-                bubble.style.bottom = '-20px';
-                bubble.style.animationDelay = `${Math.random() * 5}s`;
-                aquarium.appendChild(bubble);
-            }
-        }
-
-        // Create corals
-        function createCorals() {
-            const aquarium = document.getElementById('aquarium');
-            const coralColors = ['#ff7f50', '#ff6347', '#ff8c69', '#ff7256'];
-            
-            for (let i = 0; i < 5; i++) {
-                const coral = document.createElement('img');
-                coral.className = 'coral';
-                coral.src = `https://svgur.com/i/${['s5X', 's5Y', 's5Z', 's60'][i % 4]}.svg`;
-                coral.style.left = `${Math.random() * 90}vw`;
-                coral.style.transform = `scale(${Math.random() * 0.5 + 0.8})`;
-                if (Math.random() > 0.5) {
-                    coral.style.transform += ' scaleX(-1)';
-                }
-                aquarium.appendChild(coral);
-            }
-        }
-
-        // Add fish to aquarium with animation
-        function addFishToAquarium(fishData) {
-            const aquarium = document.getElementById('aquarium');
-            const fish = document.createElement('img');
-            fish.className = 'fish';
-            fish.src = fishData.imageUrl;
-            fish.style.left = `${Math.random() * 80}vw`;
-            fish.style.top = `${Math.random() * 80}vh`;
-            
-            // Set random initial direction
-            const direction = Math.random() > 0.5 ? 1 : -1;
-            fish.style.transform = `scaleX(${direction})`;
-            
-            aquarium.appendChild(fish);
-            animateFish(fish, direction);
-        }
-
-        // Animate fish movement
-        function animateFish(fish, initialDirection) {
-            let x = parseFloat(fish.style.left);
-            let y = parseFloat(fish.style.top);
-            let direction = initialDirection;
-            let speed = Math.random() * 2 + 1;
-            
-            function move() {
-                x += speed * direction;
-                
-                // Boundary check
-                if (x > 90 || x < 0) {
-                    direction *= -1;
-                    fish.style.transform = `scaleX(${direction})`;
-                }
-                
-                // Random vertical movement
-                y += (Math.random() - 0.5) * 2;
-                y = Math.max(0, Math.min(y, 85));
-                
-                fish.style.left = `${x}vw`;
-                fish.style.top = `${y}vh`;
-                
-                // Tail wiggle effect
-                const wiggle = Math.sin(Date.now() / 200) * 5;
-                fish.style.transform = `scaleX(${direction}) rotate(${wiggle}deg)`;
-                
-                requestAnimationFrame(move);
-            }
-            
-            move();
-        }
-
-        // Initialize aquarium
-        document.addEventListener('DOMContentLoaded', () => {
-            createBubbles();
-            createCorals();
-            
-            // Listen for new fish additions
-            db.collection("fishes").onSnapshot((snapshot) => {
-                snapshot.docChanges().forEach((change) => {
-                    if (change.type === "added") {
-                        addFishToAquarium(change.doc.data());
-                    }
-                });
-            });
-        });
-    </script>
+        img.src = imageUrl;
+      } catch (error) {
+        console.error('Error loading fish image:', error);
+      }
+    });
+  </script>
 </body>
 </html>
