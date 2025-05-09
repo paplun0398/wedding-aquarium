@@ -22,8 +22,6 @@
   </style>
 </head>
 <body>
-  <div id="fish-count">0 fish</div>
-  
   <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
@@ -50,17 +48,10 @@
         const img = new Image();
         img.onload = () => {
           if (typeof addFishToAquarium === 'function') {
-            // Create p5 image from the loaded HTML image
             const p5Img = new p5.Image(img.width, img.height);
             p5Img.drawingContext.drawImage(img, 0, 0);
-            
             // Add to aquarium
             addFishToAquarium(p5Img);
-            
-            // Update fish count
-            const countElement = document.getElementById('fish-count');
-            const currentCount = parseInt(countElement.textContent) || 0;
-            countElement.textContent = `${currentCount + 1} fish`;
           }
         };
         img.src = fishData.image;
