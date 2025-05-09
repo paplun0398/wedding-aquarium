@@ -16,12 +16,12 @@ let isWebGLSupported = true;
 // ============== PRELOAD ASSETS ==============
 async function preload() {
   try {
-    // Load core environment assets (preserved)
+    // Core environment assets
     oceanBg = await loadImage('./assets/backgrounds/ocean-bg.jpg');
     coralImg = await loadImage('./assets/decorations/coral.png');
     bubbleImg = await loadImage('./assets/decorations/bubble.png');
 
-    // Try loading template system (new)
+    // Template
     try {
       fishConfig = await (await fetch('./assets/templates/fish-config.json')).json();
       fishTemplate = await loadImage(`./assets/templates/${fishConfig.templateImage}`);
@@ -30,7 +30,7 @@ async function preload() {
       fishTemplate = await loadImage('./assets/fish.png'); // Fallback
     }
 
-    // Preserved shader loading
+    // Shader
     const [vert, frag] = await Promise.all([
       fetch('./assets/shaders/water.vert').then(r => r.text()),
       fetch('./assets/shaders/water.frag').then(r => r.text())
@@ -55,17 +55,17 @@ function setup() {
       .style('color', 'white').style('padding', '20px');
   }
 
-  // Preserved environment initialization
+  // Environment initialization
   initCorals();
   initBubbles();
   
-  // Initialize fish (updated to use template)
+  // Initialize fish
   for (let i = 0; i < 3; i++) {
     addFish(fishTemplate, fishConfig);
   }
 }
 
-// ============== PRESERVED ENVIRONMENT FUNCTIONS ==============
+// ============== ENVIRONMENT FUNCTIONS ==============
 function initCorals() {
   for (let i = 0; i < 8; i++) {
     corals.push({
@@ -83,9 +83,9 @@ function initBubbles() {
   }
 }
 
-// ============== MAIN DRAW LOOP (PRESERVED + ENHANCED) ==============
+// ============== DRAW ==============
 function draw() {
-  // Preserved background rendering
+  // Background rendering
   if (shaderReady && isWebGLSupported) {
     shader(rippleShader);
     rippleShader.setUniform('uTexture', oceanBg);
@@ -96,7 +96,7 @@ function draw() {
     image(oceanBg, -width/2, -height/2, width * 2, height * 2);
   }
 
-  // Preserved coral rendering
+  // Coral rendering
   push();
   for (let coral of corals) {
     const waveOffset = sin(coral.wavePhase + frameCount * 0.03) * 5;
@@ -107,7 +107,7 @@ function draw() {
   }
   pop();
 
-  // Preserved bubble rendering
+  // Bubble rendering
   for (let i = bubbles.length - 1; i >= 0; i--) {
     bubbles[i].update();
     bubbles[i].display();
@@ -117,13 +117,13 @@ function draw() {
     }
   }
 
-  // Enhanced fish rendering
+  // Fish rendering
   for (let fish of fishes) {
     fish.update();
     fish.display();
   }
 
-  // Preserved bubble addition
+  // Bubble addition
   if (frameCount % 60 === 0 && bubbles.length < 30) {
     bubbles.push(new Bubble(bubbleImg));
   }
@@ -140,45 +140,19 @@ function updateFishCount() {
   if (counter) counter.textContent = `${fishes.length} fish`;
 }
 
-// ============== PRESERVED BUBBLE CLASS ==============
-class Bubble {
-  constructor(img) {
-    this.img = img;
-    this.reset();
-  }
-
-  reset() {
-    this.x = random(-width/2, width/2);
-    this.y = random(height/2, height/2 + 100);
-    this.size = random(5, 15);
-    this.speed = random(1, 3);
-  }
-
-  update() {
-    this.y -= this.speed;
-  }
-
-  display() {
-    push();
-    translate(this.x, this.y);
-    image(this.img, 0, 0, this.size, this.size);
-    pop();
-  }
-}
-
 // ============== EVENT HANDLERS ==============
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
 }
 
-// Preserved image upload
+// Image upload
 document.getElementById('fish-upload')?.addEventListener('change', async (e) => {
   const file = e.target.files[0];
   if (!file) return;
   
   try {
     const img = await loadImage(URL.createObjectURL(file));
-    addFish(img); // Add without config for custom fish
+    addFish(img); //
   } catch (error) {
     console.error("Error loading uploaded image:", error);
   }
