@@ -255,13 +255,18 @@ function windowResized() {
 function addRandomFish() {
   if (fishes.length >= MAX_FISH) return;
   
-  // Create a placeholder fish graphic
+  // Create a properly oriented placeholder fish
   let pg = createGraphics(200, 80);
-  pg.fill(255, 200, 0);
-  pg.ellipse(60, 40, 100, 40); // Body
-  pg.triangle(110, 40, 160, 20, 160, 60); // Tail
+  pg.fill(random(100, 255), random(100, 255), random(100, 255));
   
-  fishes.push(new Fish(pg));
+  // Draw fish facing RIGHT (important for correct movement)
+  pg.ellipse(60, 40, 100, 40); // Body (center-left)
+  pg.triangle(110, 40, 160, 20, 160, 60); // Tail (right side)
+  
+  // Create fish with random direction
+  let fish = new Fish(pg);
+  fish.angle = random(TWO_PI); // Random starting direction
+  fishes.push(fish);
 }
 
 // For upload functionality (connect to your HTML)
