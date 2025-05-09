@@ -118,9 +118,8 @@ class Fish {
     translate(this.x, this.y);
     rotate(this.angle);
     
-    // // Draw fish body
-    // imageMode(CENTER);
-    // image(this.img, 0, 0, this.size, this.size * 0.4);
+    imageMode(CENTER);
+    image(this.img, 0, 0, this.size, this.size * 0.4);
     
     pop();
   }
