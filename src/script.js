@@ -118,18 +118,9 @@ class Fish {
     translate(this.x, this.y);
     rotate(this.angle);
     
-    // Draw fish body
-    imageMode(CENTER);
-    image(this.img, 0, 0, this.size, this.size * 0.4);
-    
-    // Draw tail
-    fill(255, 200, 0);
-    noStroke();
-    beginShape();
-    vertex(-this.size * 0.3, 0);
-    vertex(-this.size * 0.5, this.tailWiggle - this.size * 0.1);
-    vertex(-this.size * 0.5, this.tailWiggle + this.size * 0.1);
-    endShape(CLOSE);
+    // // Draw fish body
+    // imageMode(CENTER);
+    // image(this.img, 0, 0, this.size, this.size * 0.4);
     
     pop();
   }
