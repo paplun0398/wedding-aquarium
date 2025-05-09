@@ -1,7 +1,7 @@
 // ============== CONFIGURATION ==============
 const MAX_FISH = 150;
 const BUBBLE_COUNT = 30;
-const CORAL_COUNT = 8;
+const CORAL_COUNT = 5;
 
 // ============== GLOBAL VARIABLES ==============
 let fishes = [], bubbles = [], corals = [];
