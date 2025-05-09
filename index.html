@@ -12,26 +12,42 @@
       background: rgba(255,255,255,0.7);
       padding: 10px;
       border-radius: 10px;
+      font-family: Arial;
     }
   </style>
 </head>
-<body>  
+<body>
   <script src="sketch.js"></script>
   <script>
-    // Load any saved fish from upload page
-    window.addEventListener('load', () => {
-      const savedFish = localStorage.getItem('latestFish');
-      if (savedFish) {
-        const img = new Image();
-        img.onload = () => {
-          const p5Img = createImage(img.width, img.height);
-          p5Img.copy(img, 0, 0, img.width, img.height, 0, 0, img.width, img.height);
-          fishes.push(new Fish(p5Img));
-          localStorage.removeItem('latestFish'); // Clear after loading
-        };
-        img.src = savedFish;
+    // Communication channel for instant updates
+    const channel = new BroadcastChannel('aquarium');
+    channel.onmessage = (e) => {
+      if (e.data.type === 'newFish') {
+        addFishFromData(e.data.data);
       }
+    };
+    
+    // Check for existing uploads on load
+    window.addEventListener('load', () => {
+      const fishData = localStorage.getItem('newFish');
+      if (fishData) addFishFromData(fishData);
     });
+    
+    function addFishFromData(dataUrl) {
+      const img = new Image();
+      img.onload = () => {
+        const p5Img = createImage(img.width, img.height);
+        p5Img.copy(img, 0, 0, img.width, img.height, 0, 0, img.width, img.height);
+        p5Img.resize(200, 0); // Standardize size
+        
+        if (typeof addFishToAquarium === 'function') {
+          addFishToAquarium(p5Img);
+          document.getElementById('fish-count').textContent = 
+            `${fishes.length} fish`;
+        }
+      };
+      img.src = dataUrl;
+    }
   </script>
 </body>
 </html>

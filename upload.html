@@ -5,17 +5,23 @@
   <style>
     body {
       font-family: Arial, sans-serif;
+      background: #f0f8ff;
       text-align: center;
       padding: 20px;
-      background: #f0f8ff;
     }
     .container {
       max-width: 500px;
-      margin: 50px auto;
-      padding: 30px;
+      margin: 0 auto;
       background: white;
+      padding: 30px;
       border-radius: 15px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    #preview {
+      max-width: 300px;
+      margin: 20px auto;
+      border: 2px dashed #ccc;
+      min-height: 150px;
     }
     button {
       background: #4CAF50;
@@ -25,50 +31,56 @@
       font-size: 16px;
       border-radius: 30px;
       cursor: pointer;
-      margin-top: 20px;
-    }
-    #preview {
-      max-width: 300px;
-      margin: 20px auto;
-      border: 2px dashed #ccc;
-      padding: 10px;
+      margin: 10px;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Add Your Fish to the Aquarium!</h1>
-    <p>Draw on the provided template and upload below:</p>
+    <h1>Add Your Fish</h1>
+    <p>Draw a fish on white paper and upload:</p>
     
     <input type="file" id="fish-upload" accept="image/*" capture="camera" style="display:none;">
-    <button id="upload-btn">📸 Upload Fish Drawing</button>
+    <button id="upload-btn">📸 Upload Fish</button>
     
     <div id="preview"></div>
     <p id="status">Ready to upload</p>
-    
-    <p><a href="index.html">View the Aquarium →</a></p>
   </div>
 
   <script>
-    document.getElementById('upload-btn').addEventListener('click', () => {
-      document.getElementById('fish-upload').click();
-    });
-
-    document.getElementById('fish-upload').addEventListener('change', function(e) {
+    const uploadBtn = document.getElementById('upload-btn');
+    const fishUpload = document.getElementById('fish-upload');
+    const preview = document.getElementById('preview');
+    const status = document.getElementById('status');
+    
+    // Setup communication channel
+    const channel = new BroadcastChannel('aquarium');
+    
+    uploadBtn.addEventListener('click', () => fishUpload.click());
+    
+    fishUpload.addEventListener('change', (e) => {
       const file = e.target.files[0];
-      if (file) {
+      if (!file) return;
+      
+      status.textContent = "Processing...";
+      preview.innerHTML = '';
+      
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        // Display preview
         const img = document.createElement('img');
-        img.src = URL.createObjectURL(file);
+        img.src = event.target.result;
         img.style.maxWidth = '100%';
+        preview.appendChild(img);
         
-        document.getElementById('preview').innerHTML = '';
-        document.getElementById('preview').appendChild(img);
-        document.getElementById('status').textContent = 'Uploading...';
+        // Store and notify
+        localStorage.setItem('newFish', event.target.result);
+        channel.postMessage({ type: 'newFish', data: event.target.result });
         
-        // Store in localStorage (simplified)
-        localStorage.setItem('latestFish', img.src);
-        document.getElementById('status').textContent = 'Uploaded!';
-      }
+        status.textContent = "Fish added to aquarium!";
+        e.target.value = '';
+      };
+      reader.readAsDataURL(file);
     });
   </script>
 </body>
