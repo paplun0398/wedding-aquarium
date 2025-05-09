@@ -16,30 +16,25 @@ let isWebGLSupported = true;
 // ============== PRELOAD ASSETS ==============
 async function preload() {
   try {
-    // Core environment assets
+    // Load background assets
     oceanBg = await loadImage('./assets/backgrounds/ocean-bg.jpg');
     coralImg = await loadImage('./assets/decorations/coral.png');
     bubbleImg = await loadImage('./assets/decorations/bubble.png');
-
-    // Template
-    try {
-      fishConfig = await (await fetch('./assets/templates/fish-config.json')).json();
-      fishTemplate = await loadImage(`./assets/templates/${fishConfig.templateImage}`);
-    } catch {
-      console.log("Using default fish instead of template");
-      fishTemplate = await loadImage('./assets/fish.png'); // Fallback
-    }
-
-    // Shader
-    const [vert, frag] = await Promise.all([
-      fetch('./assets/shaders/water.vert').then(r => r.text()),
-      fetch('./assets/shaders/water.frag').then(r => r.text())
-    ]);
-    rippleShader = createShader(vert, frag);
+    
+    // Load fish template
+    fishTemplate = await loadImage('./assets/templates/fish-template.png');
+    
+    // Load shaders
+    const vertShader = await fetch('./assets/shaders/water.vert');
+    const fragShader = await fetch('./assets/shaders/water.frag');
+    const vertCode = await vertShader.text();
+    const fragCode = await fragShader.text();
+    
+    rippleShader = createShader(vertCode, fragCode);
     shaderReady = true;
   } catch (error) {
-    console.error("Loading error:", error);
-    // Fallback background
+    console.error("Error loading assets:", error);
+    // Fallback to colored background if oceanBg fails to load
     oceanBg = createGraphics(width, height);
     oceanBg.background(0, 50, 100);
   }
@@ -54,8 +49,13 @@ function setup() {
     createDiv("WebGL not available - Using basic rendering")
       .style('color', 'white').style('padding', '20px');
   }
+  
+  // Initialize environment
+  initEnvironment();
+}
 
-  // Environment initialization
+// ============== ENVIRONMENT FUNCTIONS ==============
+function initEnvironment() {
   initCorals();
   initBubbles();
   
@@ -65,7 +65,6 @@ function setup() {
   }
 }
 
-// ============== ENVIRONMENT FUNCTIONS ==============
 function initCorals() {
   for (let i = 0; i < 8; i++) {
     corals.push({
@@ -83,10 +82,29 @@ function initBubbles() {
   }
 }
 
-// ============== DRAW ==============
+// ============== RENDERING ==============
 function draw() {
-  // Background rendering
-  if (shaderReady && isWebGLSupported) {
+  // Clear background
+  background(0, 50, 100);
+  
+  // Draw ocean with shader or fallback
+  drawBackground();
+  
+  // Draw environment
+  drawCorals();
+  drawBubbles();
+  
+  // Update and draw fish
+  updateFish();
+  
+  // Occasionally add new bubbles
+  if (frameCount % 60 === 0 && bubbles.length < 30) {
+    bubbles.push(new Bubble(bubbleImg));
+  }
+}
+
+function drawBackground() {
+  if (shaderReady && rippleShader) {
     shader(rippleShader);
     rippleShader.setUniform('uTexture', oceanBg);
     rippleShader.setUniform('time', millis() / 1000);
@@ -95,37 +113,27 @@ function draw() {
   } else {
     image(oceanBg, -width/2, -height/2, width * 2, height * 2);
   }
+}
 
-  // Coral rendering
+function drawCorals() {
   push();
   for (let coral of corals) {
-    const waveOffset = sin(coral.wavePhase + frameCount * 0.03) * 5;
-    imageMode(CENTER);
-    image(coralImg, coral.x, coral.y + waveOffset, 
-          coralImg.width * coral.size, coralImg.height * coral.size);
-    coral.wavePhase += 0.005;
+    coral.display();
   }
   pop();
+}
 
-  // Bubble rendering
-  for (let i = bubbles.length - 1; i >= 0; i--) {
-    bubbles[i].update();
-    bubbles[i].display();
-    if (bubbles[i].y < -height/2) {
-      bubbles.splice(i, 1);
-      bubbles.push(new Bubble(bubbleImg));
-    }
+function drawBubbles() {
+  for (let bubble of bubbles) {
+    bubble.update();
+    bubble.display();
   }
+}
 
-  // Fish rendering
+function updateFish() {
   for (let fish of fishes) {
     fish.update();
     fish.display();
-  }
-
-  // Bubble addition
-  if (frameCount % 60 === 0 && bubbles.length < 30) {
-    bubbles.push(new Bubble(bubbleImg));
   }
 }
 
