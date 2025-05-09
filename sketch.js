@@ -144,18 +144,20 @@ class Fish {
     this.angle = random(TWO_PI);
     this.tailWiggle = 0;
     this.flipPhase = 0;
+    this.isFacingRight = random() > 0.5; // Random initial orientation
   }
   
   update() {
     // Tail animation
     this.tailWiggle = sin(frameCount * 0.2) * 10;
     
-    // Movement
+    // Movement - always move forward relative to head direction
     if (this.flipPhase > 0) {
       this.flipPhase -= 0.05;
     } else {
-      this.x += cos(this.angle) * this.speed;
-      this.y += sin(this.angle) * this.speed;
+      const moveAngle = this.isFacingRight ? this.angle : this.angle + PI;
+      this.x += cos(moveAngle) * this.speed;
+      this.y += sin(moveAngle) * this.speed;
       
       // Border collision with flip
       if (abs(this.x) > width/2 || abs(this.y) > height/2) {
@@ -171,24 +173,28 @@ class Fish {
     
     // Flip animation
     if (this.flipPhase > 0) {
-      rotate(this.angle - PI);
-      scale(1, map(this.flipPhase, PI, 0, -1, 1));
+      const flipDirection = this.isFacingRight ? 1 : -1;
+      rotate(this.angle - PI/2);
+      scale(flipDirection, map(this.flipPhase, PI, 0, -1, 1));
     } else {
-      rotate(this.angle);
+      // Face forward based on orientation
+      rotate(this.angle - PI/2); // Head faces direction of movement
+      scale(this.isFacingRight ? 1 : -1, 1); // Flip horizontally if needed
     }
     
-    // Draw fish
+    // Draw fish body
     imageMode(CENTER);
     image(this.img, 0, 0, this.size, this.size * 0.4);
     
-    // Draw tail
+    // Draw tail (fixed to always be at the back)
     fill(255, 200, 0);
     noStroke();
     beginShape();
-    vertex(this.size * 0.3, 0);
-    vertex(this.size * 0.5, this.tailWiggle - this.size * 0.1);
-    vertex(this.size * 0.5, this.tailWiggle + this.size * 0.1);
+    vertex(this.size * -0.3, 0); // Connected to body
+    vertex(this.size * -0.5, this.tailWiggle - this.size * 0.1); // Tail tip
+    vertex(this.size * -0.5, this.tailWiggle + this.size * 0.1); // Tail tip
     endShape(CLOSE);
+    
     pop();
   }
 }
