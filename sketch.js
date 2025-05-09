@@ -5,41 +5,57 @@ const CORAL_COUNT = 8;
 
 let fishes = [], bubbles = [], corals = [];
 let oceanBg, coralImg, bubbleImg, rippleShader;
+let oceanTexture;
 
 function preload() {
-  oceanBg = loadImage('assets/ocean-bg.jpg');
-  coralImg = loadImage('assets/coral.png');
-  bubbleImg = loadImage('assets/bubble.png');
-  rippleShader = loadShader('assets/shaders/water.vert', 'assets/shaders/water.frag');
+  // Load assets first
+  oceanTexture = loadImage('assets/ocean-bg.jpg');
+  
+  // Load shaders as strings
+  loadStrings('assets/shaders/water.vert', vertShaderLoaded);
+  loadStrings('assets/shaders/water.frag', fragShaderLoaded);
+}
+
+let vertShaderCode, fragShaderCode;
+
+function vertShaderLoaded(data) {
+  vertShaderCode = join(data, '\n');
+  tryInitShader();
+}
+
+function fragShaderLoaded(data) {
+  fragShaderCode = join(data, '\n');
+  tryInitShader();
+}
+
+function tryInitShader() {
+  if (vertShaderCode && fragShaderCode) {
+    rippleShader = createShader(vertShaderCode, fragShaderCode);
+  }
 }
 
 function setup() {
   createCanvas(windowWidth, windowHeight, WEBGL);
-  
-  // Initialize environment
-  for (let i = 0; i < 8; i++) {
-    corals.push({
-      x: random(-width/2, width/2),
-      y: height/2 - random(50, 200),
-      size: random(0.7, 1.3),
-      wavePhase: random(TWO_PI)
-    });
-  }
-  
-  for (let i = 0; i < 30; i++) {
-    bubbles.push(new Bubble());
-  }
+  // ... rest of setup
 }
 
 function draw() {
-  background(0, 50, 100);
-  
-  // Water shader
+  if (!rippleShader) {
+    background(0, 50, 100);
+    text("Loading shaders...", 0, 0);
+    return;
+  }
+
+  // Draw with shader
   shader(rippleShader);
-  rippleShader.setUniform('uTexture', oceanBg);
-  rippleShader.setUniform('time', frameCount * 0.01);
+  rippleShader.setUniform('uTexture', oceanTexture);
+  rippleShader.setUniform('time', millis() / 1000); // Use seconds
+  
+  push();
   translate(0, 100);
   plane(width * 1.5, height * 0.7);
+  pop();
+  
   resetShader();
   
   // Draw environment
