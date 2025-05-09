@@ -5,11 +5,10 @@ const CORAL_COUNT = 8;
 
 // ============== GLOBAL VARIABLES ==============
 let fishes = [], bubbles = [], corals = [];
-let oceanBg, coralImg, bubbleImg;
+let oceanBg, coralImg, bubbleImg, fishImg;
 let rippleShader;
 let shaderReady = false;
 let canvas;
-let fishImg;
 
 // ============== PRELOAD ASSETS ==============
 function preload() {
