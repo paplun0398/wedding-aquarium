@@ -2,7 +2,7 @@ export default class Fish {
   constructor(img, config) {
     this.img = img;
     this.config = config;
-    this.size = random(80, 150);
+    this.size = 150;
     
     // Set directional multipliers
     this.headDirMult = config.headDirection === "right" ? 1 : -1;
