@@ -141,28 +141,26 @@ class Fish {
     this.x = random(-width/2, width/2);
     this.y = random(-height/2, height/2);
     this.speed = random(0.5, 1.5);
-    this.angle = random(TWO_PI);
+    this.angle = random(TWO_PI); // Initial facing direction
     this.tailWiggle = 0;
     this.flipPhase = 0;
-    this.isFacingRight = random() > 0.5; // Random initial orientation
   }
   
   update() {
-    // Tail animation
+    // Tail animation (always wiggles opposite to movement)
     this.tailWiggle = sin(frameCount * 0.2) * 10;
     
-    // Movement - always move forward relative to head direction
+    // Movement - always move forward relative to current angle
     if (this.flipPhase > 0) {
       this.flipPhase -= 0.05;
     } else {
-      const moveAngle = this.isFacingRight ? this.angle : this.angle + PI;
-      this.x += cos(moveAngle) * this.speed;
-      this.y += sin(moveAngle) * this.speed;
+      this.x += cos(this.angle) * this.speed;
+      this.y += sin(this.angle) * this.speed;
       
       // Border collision with flip
       if (abs(this.x) > width/2 || abs(this.y) > height/2) {
         this.flipPhase = PI;
-        this.angle += PI + random(-0.5, 0.5);
+        this.angle = atan2(-sin(this.angle), -cos(this.angle)); // Reverse direction
       }
     }
   }
@@ -171,28 +169,25 @@ class Fish {
     push();
     translate(this.x, this.y);
     
+    // Rotate to face movement direction (0° = right)
+    rotate(this.angle);
+    
     // Flip animation
     if (this.flipPhase > 0) {
-      const flipDirection = this.isFacingRight ? 1 : -1;
-      rotate(this.angle - PI/2);
-      scale(flipDirection, map(this.flipPhase, PI, 0, -1, 1));
-    } else {
-      // Face forward based on orientation
-      rotate(this.angle - PI/2); // Head faces direction of movement
-      scale(this.isFacingRight ? 1 : -1, 1); // Flip horizontally if needed
+      scale(1, map(this.flipPhase, PI, 0, -1, 1));
     }
     
-    // Draw fish body
+    // Draw fish body (centered at midpoint)
     imageMode(CENTER);
     image(this.img, 0, 0, this.size, this.size * 0.4);
     
-    // Draw tail (fixed to always be at the back)
+    // Draw tail at the back (negative x-axis)
     fill(255, 200, 0);
     noStroke();
     beginShape();
-    vertex(this.size * -0.3, 0); // Connected to body
-    vertex(this.size * -0.5, this.tailWiggle - this.size * 0.1); // Tail tip
-    vertex(this.size * -0.5, this.tailWiggle + this.size * 0.1); // Tail tip
+    vertex(-this.size * 0.3, 0); // Connection to body
+    vertex(-this.size * 0.5, this.tailWiggle - this.size * 0.1); // Tail tip
+    vertex(-this.size * 0.5, this.tailWiggle + this.size * 0.1); // Tail tip
     endShape(CLOSE);
     
     pop();
