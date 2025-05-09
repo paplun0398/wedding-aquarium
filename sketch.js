@@ -50,11 +50,6 @@ function setup() {
   // Initialize environment
   initCorals();
   initBubbles();
-  
-  // Start with some fish
-  for (let i = 0; i < 3; i++) {
-    addRandomFish();
-  }
 }
 
 // ============== MAIN DRAW LOOP ==============
@@ -93,20 +88,6 @@ function addFishToAquarium(img) {
     fishes.push(new Fish(img));
     updateFishCount();
   }
-}
-
-function addRandomFish() {
-  let fish = {
-    x: random(width),
-    y: random(height),
-    size: random(30, 70),
-    speed: random(1, 3),
-    color: color(random(100, 255), random(100, 255), random(100, 255)),
-    direction: random([-1, 1]), // Facing left (-1) or right (1)
-    img: fishImg // Reference to the loaded image
-  };
-  fishes.push(fish);
-  updateFishCount();
 }
 
 function updateAndDrawFish() {
