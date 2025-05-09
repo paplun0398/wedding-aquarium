@@ -28,7 +28,6 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
     import { getDatabase, ref, onChildAdded } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-database.js";
-    import { getStorage, ref as storageRef, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-storage.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyA_LZENgeCagnnlWnw1z0rnyGoEeH-tgok",
@@ -43,15 +42,11 @@
 
     const app = initializeApp(firebaseConfig);
     const database = getDatabase(app);
-    const storage = getStorage(app);
     
     // Listen for new fish added to database
-    onChildAdded(ref(database, 'fishes'), async (snapshot) => {
+    onChildAdded(ref(database, 'fishes'), (snapshot) => {
       const fishData = snapshot.val();
       try {
-        // Get the download URL from Firebase Storage
-        const imageUrl = await getDownloadURL(storageRef(storage, fishData.imagePath));
-        
         const img = new Image();
         img.onload = () => {
           if (typeof addFishToAquarium === 'function') {
@@ -65,7 +60,7 @@
             countElement.textContent = `${currentCount + 1} fish`;
           }
         };
-        img.src = imageUrl;
+        img.src = fishData.image; // Use the base64 image data directly from the database
       } catch (error) {
         console.error('Error loading fish image:', error);
       }
