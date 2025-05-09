@@ -6,7 +6,8 @@ import Coral from './components/Coral.js';
 
 // ============== GLOBAL VARIABLES ==============
 let fishes = [], bubbles = [], corals = [];
-let oceanBg, coralImg, bubbleImg, fishTemplate;
+let oceanBg, coralImg, bubbleImg;
+let fishTemplate, fishConfig;
 let rippleShader;
 let shaderReady = false;
 let canvas;
@@ -14,13 +15,14 @@ let canvas;
 // ============== PRELOAD ASSETS ==============
 async function preload() {
   try {
-    // Load background assets
+    // Load environment assets
     oceanBg = await loadImage('./assets/backgrounds/ocean-bg.jpg');
     coralImg = await loadImage('./assets/decorations/coral.png');
     bubbleImg = await loadImage('./assets/decorations/bubble.png');
     
-    // Load fish template
-    fishTemplate = await loadImage('./assets/templates/fish-template.png');
+    // Load fish template system (NEW)
+    fishConfig = await (await fetch('./assets/templates/fish-config.json')).json();
+    fishTemplate = await loadImage(`./assets/templates/${fishConfig.templateImage}`);
     
     // Load shaders
     const vertShader = await fetch('./assets/shaders/water.vert');
@@ -32,7 +34,7 @@ async function preload() {
     shaderReady = true;
   } catch (error) {
     console.error("Error loading assets:", error);
-    // Fallback to colored background if oceanBg fails to load
+    // Fallback to colored background
     oceanBg = createGraphics(width, height);
     oceanBg.background(0, 50, 100);
   }
@@ -49,7 +51,7 @@ function setup() {
     fallbackMsg.style('color', 'white').style('padding', '20px');
   }
   
-  // Initialize environment
+  // Initialize with template-based fish (NEW)
   initEnvironment();
 }
 
@@ -64,70 +66,19 @@ function initEnvironment() {
     bubbles.push(new Bubble(bubbleImg));
   }
   
-  // Create initial fish
+  // Create initial fish using template (NEW)
   for (let i = 0; i < 3; i++) {
-    addFish(fishTemplate);
-  }
-}
-
-// ============== MAIN DRAW LOOP ==============
-function draw() {
-  // Clear background
-  background(0, 50, 100);
-  
-  // Draw ocean with shader or fallback
-  drawBackground();
-  
-  // Draw environment
-  drawCorals();
-  drawBubbles();
-  
-  // Update and draw fish
-  updateFish();
-  
-  // Occasionally add new bubbles
-  if (frameCount % 60 === 0 && bubbles.length < 30) {
-    bubbles.push(new Bubble(bubbleImg));
-  }
-}
-
-function drawBackground() {
-  if (shaderReady && rippleShader) {
-    shader(rippleShader);
-    rippleShader.setUniform('uTexture', oceanBg);
-    rippleShader.setUniform('time', millis() / 1000);
-    plane(width * 2, height * 2);
-    resetShader();
-  } else {
-    image(oceanBg, -width/2, -height/2, width * 2, height * 2);
-  }
-}
-
-function drawCorals() {
-  push();
-  for (let coral of corals) {
-    coral.display();
-  }
-  pop();
-}
-
-function drawBubbles() {
-  for (let bubble of bubbles) {
-    bubble.update();
-    bubble.display();
-  }
-}
-
-function updateFish() {
-  for (let fish of fishes) {
-    fish.update();
-    fish.display();
+    addFish(fishTemplate, fishConfig);  // Pass config to fish
   }
 }
 
 // ============== FISH MANAGEMENT ==============
-function addFish(img) {
-  fishes.push(new Fish(img));
+function addFish(img, config = null) {  // Updated signature
+  const newFish = config ? 
+    new Fish(img, config) :  // Template-based fish
+    new Fish(img);           // Legacy fish
+  
+  fishes.push(newFish);
   updateFishCount();
 }
 
