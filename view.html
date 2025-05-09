@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Wedding Aquarium</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+  <style>
+    body { margin: 0; overflow: hidden; }
+    #controls {
+      position: fixed;
+      bottom: 10px;
+      left: 10px;
+      background: rgba(255,255,255,0.7);
+      padding: 10px;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div id="controls">
+    <a href="upload.html">Add More Fish →</a>
+  </div>
+  
+  <script src="sketch.js"></script>
+  <script>
+    // Load any saved fish from upload page
+    window.addEventListener('load', () => {
+      const savedFish = localStorage.getItem('latestFish');
+      if (savedFish) {
+        const img = new Image();
+        img.onload = () => {
+          const p5Img = createImage(img.width, img.height);
+          p5Img.copy(img, 0, 0, img.width, img.height, 0, 0, img.width, img.height);
+          fishes.push(new Fish(p5Img));
+          localStorage.removeItem('latestFish'); // Clear after loading
+        };
+        img.src = savedFish;
+      }
+    });
+  </script>
+</body>
+</html>
