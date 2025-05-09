@@ -5,24 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Wedding Aquarium</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
-  <script src="sketch.js"></script>
-  <style>
-    body { margin: 0; overflow: hidden; }
-    #fish-count {
-      position: absolute;
-      bottom: 20px;
-      right: 20px;
-      color: white;
-      font-family: Arial;
-      font-size: 18px;
-      background: rgba(0,0,0,0.5);
-      padding: 10px;
-      border-radius: 5px;
-    }
-  </style>
+  <script src="src/script.js"></script>
 </head>
 <body>
-  <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
     import { getDatabase, ref, onChildAdded } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-database.js";

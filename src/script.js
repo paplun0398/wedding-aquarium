@@ -7,13 +7,13 @@ let canvas;
 
 // ============== PRELOAD ASSETS ==============
 function preload() {
-  oceanBg = loadImage('assets/ocean-bg.jpg');
-  coralImg = loadImage('assets/coral.png');
-  bubbleImg = loadImage('assets/bubble.png');
+  oceanBg = loadImage('./assets/backgrounds/ocean-bg.jpg');
+  coralImg = loadImage('./assets/backgrounds/coral.png');
+  bubbleImg = loadImage('./assets/backgrounds/bubble.png');
   
   // Load shaders
-  loadStrings('assets/shaders/water.vert', vert => {
-    loadStrings('assets/shaders/water.frag', frag => {
+  loadStrings('./assets/shaders/water.vert', vert => {
+    loadStrings('./assets/shaders/water.frag', frag => {
       try {
         rippleShader = createShader(vert.join('\n'), frag.join('\n'));
         shaderReady = true;
