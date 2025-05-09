@@ -1,101 +1,72 @@
 export default class Fish {
-    constructor(img) {
-      this.img = img;
-      this.size = random(80, 150);
-      this.reset();
-      
-      // Fish parts configuration
-      this.parts = this.createParts();
-      this.animation = {
-        tailWagSpeed: random(0.1, 0.3),
-        tailWagAmount: random(5, 15),
-        finFlapSpeed: random(0.05, 0.15),
-        finFlapAmount: random(3, 8)
-      };
-    }
+  constructor(img, config) {
+    this.img = img;
+    this.config = config;
+    this.size = random(80, 150);
     
-    createParts() {
-      // Adjust these values to match your template
-      return {
-        head: { x: 0, y: 0, width: 40, height: 40, pivotX: 30, pivotY: 20 },
-        body: { x: 40, y: 5, width: 60, height: 30, pivotX: 0, pivotY: 15 },
-        tail: { x: 100, y: 0, width: 50, height: 40, pivotX: 10, pivotY: 20 }
-      };
-    }
+    // Set directional multipliers
+    this.headDirMult = config.headDirection === "right" ? 1 : -1;
+    this.uprightMult = config.uprightOrientation === "top" ? 1 : -1;
     
-    reset() {
-      this.x = random(-width/2, width/2);
-      this.y = random(-height/2, height/2);
-      this.speed = random(0.5, 1.5);
-      this.angle = random(TWO_PI);
-      this.direction = random() > 0.5 ? 1 : -1;
-      this.flipProgress = 0;
-      this.isFlipping = false;
-    }
+    this.reset();
+  }
+
+  reset() {
+    this.x = random(-width/2, width/2);
+    this.y = random(-height/2, height/2);
+    this.speed = random(0.5, 2);
+    this.angle = random(TWO_PI);
+  }
+
+  update() {
+    // Movement in head direction
+    this.x += cos(this.angle) * this.speed * this.headDirMult;
+    this.y += sin(this.angle) * this.speed * this.uprightMult;
     
-    update() {
-      // Movement
-      this.x += cos(this.angle) * this.speed * this.direction;
-      this.y += sin(this.angle) * this.speed;
-      
-      // Bounce off walls with flip animation
-      if (abs(this.x) > width/2) {
-        this.isFlipping = true;
-        this.direction *= -1;
-      }
-      
-      // Handle flip animation
-      if (this.isFlipping) {
-        this.flipProgress += 0.1;
-        if (this.flipProgress >= 1) {
-          this.flipProgress = 0;
-          this.isFlipping = false;
-        }
-      }
-      
-      // Random direction changes
-      if (random() < 0.01) {
-        this.angle += random(-0.5, 0.5);
-      }
+    // Edge bounce with direction preservation
+    if (this.x > width/2 || this.x < -width/2) {
+      this.angle = PI - this.angle;
     }
-    
-    display() {
-      push();
-      translate(this.x, this.y);
-      
-      // Apply flip animation if needed
-      if (this.isFlipping) {
-        const flipScale = abs(this.flipProgress - 0.5) * 2;
-        scale(1 - flipScale * 0.8, 1);
-      }
-      
-      rotate(this.angle);
-      scale(this.direction, 1);
-      
-      // Draw each part with animation
-      for (const partName in this.parts) {
-        const part = this.parts[partName];
-        
-        push();
-        translate(part.pivotX, part.pivotY);
-        
-        // Part-specific animations
-        if (partName === 'tail') {
-          const wag = sin(frameCount * this.animation.tailWagSpeed) * this.animation.tailWagAmount;
-          rotate(radians(wag));
-        } else if (partName === 'head') {
-          const bob = sin(frameCount * this.animation.finFlapSpeed) * this.animation.finFlapAmount;
-          rotate(radians(bob));
-        }
-        
-        translate(-part.pivotX, -part.pivotY);
-        image(this.img, 
-             -part.x, -part.y, 
-             this.img.width, this.img.height, 
-             part.x, part.y, part.width, part.height);
-        pop();
-      }
-      
-      pop();
+    if (this.y > height/2 || this.y < -height/2) {
+      this.angle = -this.angle;
     }
   }
+
+  display() {
+    push();
+    translate(this.x, this.y);
+    
+    // Auto-orientation
+    rotate(this.angle);
+    scale(this.headDirMult, this.uprightMult);
+    
+    // Draw base image
+    image(this.img, 0, 0, this.size, this.size * 0.4);
+    
+    // Animate tail
+    this.animatePart('tail', 0.2, 0.5);
+    
+    // Animate fin if configured
+    if (this.config.fin) {
+      this.animatePart('fin', 0.15, 0.3, 1.0);
+    }
+    
+    pop();
+  }
+
+  animatePart(partName, speed, amount, phaseOffset = 0) {
+    const part = this.config[partName];
+    push();
+    translate(part.pivotX, part.pivotY);
+    rotate(sin(frameCount * speed + phaseOffset) * amount);
+    translate(-part.pivotX, -part.pivotY);
+    image(
+      this.img,
+      0, 0,
+      part.width, part.height,
+      part.x, part.y,
+      part.width, part.height
+    );
+    pop();
+  }
+}
