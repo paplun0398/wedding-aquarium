@@ -50,8 +50,11 @@
         const img = new Image();
         img.onload = () => {
           if (typeof addFishToAquarium === 'function') {
-            const p5Img = createImage(img.width, img.height);
-            p5Img.copy(img, 0, 0, img.width, img.height, 0, 0, img.width, img.height);
+            // Create p5 image from the loaded HTML image
+            const p5Img = new p5.Image(img.width, img.height);
+            p5Img.drawingContext.drawImage(img, 0, 0);
+            
+            // Add to aquarium
             addFishToAquarium(p5Img);
             
             // Update fish count
@@ -60,7 +63,7 @@
             countElement.textContent = `${currentCount + 1} fish`;
           }
         };
-        img.src = fishData.image; // Use the base64 image data directly from the database
+        img.src = fishData.image;
       } catch (error) {
         console.error('Error loading fish image:', error);
       }
