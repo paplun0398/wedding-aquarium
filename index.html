@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Interactive Wedding Aquarium</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/addons/p5.sound.min.js"></script>
+  <style>
+    body { margin: 0; overflow: hidden; }
+    #upload-container {
+      position: fixed; bottom: 20px; left: 0; right: 0;
+      background: rgba(255,255,255,0.8); 
+      padding: 15px; 
+      text-align: center;
+      border-radius: 15px 15px 0 0;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    button { 
+      background: #4CAF50; 
+      border: none; 
+      padding: 10px 20px; 
+      color: white; 
+      border-radius: 20px; 
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div id="upload-container">
+    <button id="upload-btn">Upload Fish Drawing</button>
+    <p id="status">Draw a fish on white paper and upload!</p>
+    <input type="file" id="fish-upload" accept="image/*" capture="camera" style="display:none;">
+  </div>
+  <script>
+// CONFIGURATION
+const MAX_FISH = 150;
+const BUBBLE_COUNT = 30;
+const CORAL_COUNT = 8;
+
+// Assets
+let oceanBg, coralImg, bubbleImg, fishImgs = [];
+let fishes = [], bubbles = [], corals = [];
+let rippleShader;
+
+function preload() {
+  // Base assets (replace with your own)
+  oceanBg = loadImage('https://i.imgur.com/J5OEGQp.jpg');
+  coralImg = loadImage('https://i.imgur.com/8h6qzqy.png');
+  bubbleImg = loadImage('https://i.imgur.com/HQaRuG0.png');
+  
+  // Shaders
+  rippleShader = loadShader(
+    'https://raw.githubusercontent.com/yourrepo/shaders/main/water.vert',
+    'https://raw.githubusercontent.com/yourrepo/shaders/main/water.frag'
+  );
+}
+
+function setup() {
+  createCanvas(windowWidth, windowHeight, WEBGL);
+  
+  // Initialize corals
+  for (let i = 0; i < CORAL_COUNT; i++) {
+    corals.push({
+      x: random(-width/2, width/2),
+      y: height/2 - random(50, 200),
+      size: random(0.7, 1.3),
+      wavePhase: random(TWO_PI)
+    });
+  }
+  
+  // Initialize bubbles
+  for (let i = 0; i < BUBBLE_COUNT; i++) {
+    bubbles.push(new Bubble());
+  }
+  
+  // Set up upload
+  document.getElementById('upload-btn').addEventListener('click', () => {
+    document.getElementById('fish-upload').click();
+  });
+  
+  document.getElementById('fish-upload').addEventListener('change', function(e) {
+    if (fishes.length >= MAX_FISH) {
+      document.getElementById('status').textContent = "Aquarium is full!";
+      return;
+    }
+    
+    const file = e.target.files[0];
+    if (file) {
+      const img = new Image();
+      img.onload = () => {
+        const fishType = detectFishType(img); // Simple shape detection
+        fishes.push(new Fish(img, fishType));
+        document.getElementById('status').textContent = "Fish added!";
+      };
+      img.src = URL.createObjectURL(file);
+    }
+  });
+}
+
+function draw() {
+  // Water background
+  background(0, 50, 100);
+  
+  // Draw ocean floor with shader
+  shader(rippleShader);
+  rippleShader.setUniform('uTexture', oceanBg);
+  rippleShader.setUniform('time', frameCount * 0.01);
+  translate(0, 100);
+  plane(width * 1.5, height * 0.7);
+  resetShader();
+  
+  // Draw corals
+  corals.forEach(coral => {
+    push();
+    translate(coral.x, coral.y + sin(coral.wavePhase + frameCount * 0.03) * 5);
+    scale(coral.size);
+    image(coralImg, 0, 0);
+    pop();
+    coral.wavePhase += 0.005;
+  });
+  
+  // Update and draw fish
+  fishes.forEach(fish => fish.update());
+  fishes.forEach(fish => fish.display());
+  
+  // Update and draw bubbles
+  bubbles.forEach(bubble => bubble.update());
+  bubbles.forEach(bubble => bubble.display());
+  
+  // Add new bubbles occasionally
+  if (frameCount % 60 === 0 && bubbles.length < BUBBLE_COUNT * 1.5) {
+    bubbles.push(new Bubble());
+  }
+}
+
+// Fish Class with Flip Animation
+class Fish {
+  constructor(img, type = 'default') {
+    this.img = img;
+    this.type = type;
+    this.reset();
+  }
+  
+  reset() {
+    this.x = random(-width/2, width/2);
+    this.y = random(-height/2, height/2);
+    this.speed = random(0.3, 1.2);
+    this.angle = random(TWO_PI);
+    this.flipPhase = 0;
+    this.tailWiggle = 0;
+  }
+  
+  update() {
+    // Tail animation
+    this.tailWiggle = sin(frameCount * 0.2) * 10;
+    
+    // Movement
+    if (this.flipPhase > 0) {
+      this.flipPhase -= 0.05; // Flip animation
+    } else {
+      this.x += cos(this.angle) * this.speed;
+      this.y += sin(this.angle) * this.speed;
+      
+      // Border collision with flip
+      if (abs(this.x) > width/2 || abs(this.y) > height/2) {
+        this.flipPhase = PI;
+        this.angle += PI + random(-0.5, 0.5);
+      }
+    }
+  }
+  
+  display() {
+    push();
+    translate(this.x, this.y);
+    
+    // Flip animation
+    if (this.flipPhase > 0) {
+      rotate(this.angle - PI);
+      scale(1, map(this.flipPhase, PI, 0, -1, 1));
+    } else {
+      rotate(this.angle);
+    }
+    
+    // Draw fish
+    imageMode(CENTER);
+    image(this.img, 0, 0, 100, 40);
+    
+    // Draw animated tail
+    fill(255, 200, 0);
+    beginShape();
+    vertex(40, 0);
+    vertex(60, this.tailWiggle - 15);
+    vertex(60, this.tailWiggle + 15);
+    endShape(CLOSE);
+    
+    pop();
+  }
+}
+
+// Bubble Class
+class Bubble {
+  constructor() {
+    this.reset();
+  }
+  
+  reset() {
+    this.x = random(-width/2, width/2);
+    this.y = random(height/2, height/2 + 100);
+    this.size = random(5, 15);
+    this.speed = random(1, 3);
+  }
+  
+  update() {
+    this.y -= this.speed;
+    if (this.y < -height/2) this.reset();
+  }
+  
+  display() {
+    push();
+    translate(this.x, this.y);
+    image(bubbleImg, 0, 0, this.size, this.size);
+    pop();
+  }
+}
+
+// Simple Shape Detection
+function detectFishType(img) {
+  // Implement your shape detection logic
+  return 'default';
+}
+
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+}
+  </script>
+</body>
+</html>
