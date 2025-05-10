@@ -5,9 +5,6 @@ let fishes = [];
 
 // ============== RENDERING ==============
 function draw() {
-  // Clear background
-  background(0, 50, 100);
-
   // Update and draw fish
   for (let fish of fishes) {
     fish.update();
@@ -56,7 +53,7 @@ class Fish {
     this.x = random(-width / 2, width / 2);
     this.y = random(-height / 2, height / 2);
     this.speed = random(0.5, 2);
-    this.direction = 1; // 1=right, -1=left
+    this.direction = 1; // 1=right
     this.angle = 0; // Swimming direction (radians)
     this.isUpsideDown = false;
   }
