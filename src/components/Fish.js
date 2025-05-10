@@ -1,12 +1,12 @@
 export default class Fish {
-  constructor(img, config) {
+  constructor(img, config = {}) {
     this.img = img;
     this.config = config;
     this.size = 150;
     
     // Set directional multipliers
-    this.headDirMult = config.headDirection === "right" ? 1 : -1;
-    this.uprightMult = config.uprightOrientation === "top" ? 1 : -1;
+    this.headDirMult = (config.headDirection || "right") === "left" ? -1 : 1;
+    this.uprightMult = (config.uprightOrientation || "top") === "bottom" ? -1 : 1;
     
     this.reset();
   }

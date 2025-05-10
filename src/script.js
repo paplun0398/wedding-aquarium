@@ -138,8 +138,8 @@ function updateFish() {
 }
 
 // ============== FISH MANAGEMENT ==============
-function addFish(img, config = null) {
-  fishes.push(config ? new Fish(img, config) : new Fish(img));
+function addFish(img, config) {
+  fishes.push(new Fish(img, config || {})); // Ensure config exists
   updateFishCount();
 }
 
