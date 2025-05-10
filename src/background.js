@@ -68,17 +68,6 @@ function draw() {
   }
 }
 
-// ============== FISH FUNCTIONS ==============
-function addFishToAquarium(img) {
-  fishes.push(new Fish(img));
-  updateFishCount();
-}
-
-function updateFishCount() {
-  const counter = document.getElementById('fish-count');
-  if (counter) counter.textContent = `${fishes.length} fish`;
-}
-
 // ============== BUBBLE CLASS ==============
 class Bubble {
   constructor() {
