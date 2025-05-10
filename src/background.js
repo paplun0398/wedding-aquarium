@@ -11,7 +11,7 @@ function preload() {
   oceanBg = loadImage('./assets/backgrounds/ocean-bg.jpg');
   coralImg = loadImage('./assets/backgrounds/coral.png');
   bubbleImg = loadImage('./assets/backgrounds/bubble.png');
-  
+
   // Load shaders
   loadStrings('./assets/shaders/water.vert', vert => {
     loadStrings('./assets/shaders/water.frag', frag => {
@@ -29,14 +29,14 @@ function preload() {
 function setup() {
   canvas = createCanvas(windowWidth, windowHeight, WEBGL);
   isWebGLSupported = !!canvas.elt.getContext('webgl');
-  
+
   // Verify WebGL support
   if (!canvas.elt.getContext('webgl')) {
     console.error("WebGL not supported - using fallback");
     const fallbackMsg = createDiv("WebGL not supported - Some effects disabled");
     fallbackMsg.style('color', 'white').style('padding', '20px');
   }
-  
+
   // Initialize environment
   initCorals();
   initBubbles();
@@ -46,7 +46,7 @@ function setup() {
 function draw() {
   // Clear background
   background(0, 50, 100);
-  
+
   // Draw ocean with shader or fallback
   if (shaderReady && rippleShader) {
     shader(rippleShader);
@@ -55,13 +55,13 @@ function draw() {
     plane(width * 2 + 2, height * 2 + 2);
     resetShader();
   } else {
-    image(oceanBg, -width/2, -height/2, width * 2, height * 2);
+    image(oceanBg, -width / 2, -height / 2, width * 2, height * 2);
   }
-  
+
   // Draw environment
   drawCorals();
   drawBubbles();
-  
+
   // Add new bubbles occasionally
   if (frameCount % 60 === 0 && bubbles.length < 30) {
     bubbles.push(new Bubble());
@@ -73,19 +73,19 @@ class Bubble {
   constructor() {
     this.reset();
   }
-  
+
   reset() {
-    this.x = random(-width/2, width/2);
-    this.y = random(height/2, height/2 + 100);
+    this.x = random(-width / 2, width / 2);
+    this.y = random(height / 2, height / 2 + 100);
     this.size = random(5, 20);
     this.speed = random(1, 3);
   }
-  
+
   update() {
     this.y -= this.speed;
-    if (this.y < -height/2) this.reset();
+    if (this.y < -height / 2) this.reset();
   }
-  
+
   display() {
     push();
     translate(this.x, this.y);
@@ -98,8 +98,8 @@ class Bubble {
 function initCorals() {
   for (let i = 0; i < 6; i++) {
     corals.push({
-      x: random(-width/2, width/2),
-      y: height/2 - random(50, 200),
+      x: random(-width / 2, width / 2),
+      y: height / 2 - random(50, 200),
       size: random(0.7, 1.3),
       wavePhase: random(TWO_PI)
     });
@@ -117,8 +117,8 @@ function drawCorals() {
   for (let coral of corals) {
     const waveOffset = sin(coral.wavePhase + frameCount * 0.03) * 5;
     imageMode(CENTER);
-    image(coralImg, coral.x, coral.y + waveOffset, 
-          coralImg.width * coral.size, coralImg.height * coral.size);
+    image(coralImg, coral.x, coral.y + waveOffset,
+      coralImg.width * coral.size, coralImg.height * coral.size);
     coral.wavePhase += 0.005;
   }
   pop();
