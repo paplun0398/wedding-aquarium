@@ -78,23 +78,24 @@ function draw() {
 class Fish {
   constructor(img) {
     this.img = img;
-    this.size = 150;
+    this.width = 150;
+    this.height = 93;
     this.parts = {
       "tail": {
-        "x": 1690,
-        "y": 488,
-        "width": 508,
-        "height": 706,
-        "pivotX": 1682,
-        "pivotY": 810
+        "x": 120,
+        "y": 26,
+        "width": 29,
+        "height": 52,
+        "pivotX": 120,
+        "pivotY": 51
       },
       "fin": {
-        "x": 1184,
-        "y": 128,
-        "width": 470,
-        "height": 308,
-        "pivotX": 1182,
-        "pivotY": 318
+        "x": 78,
+        "y": 1,
+        "width": 33,
+        "height": 23,
+        "pivotX": 82,
+        "pivotY": 17
       }
     };
     this.reset();
@@ -137,7 +138,7 @@ class Fish {
     rotate(this.angle);
 
     // Draw base image (body/head)
-    image(this.img, 0, 0, this.size, this.size * 0.4);
+    image(this.img, 0, 0, this.width, this.height);
 
     // ANIMATE TAIL
     push();
