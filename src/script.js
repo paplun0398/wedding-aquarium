@@ -4,6 +4,7 @@ let oceanBg, coralImg, bubbleImg;
 let rippleShader;
 let shaderReady = false;
 let canvas;
+let isWebGLSupported = true;
 
 // ============== PRELOAD ASSETS ==============
 function preload() {
@@ -27,6 +28,7 @@ function preload() {
 // ============== SETUP ==============
 function setup() {
   canvas = createCanvas(windowWidth, windowHeight, WEBGL);
+  isWebGLSupported = !!canvas.elt.getContext('webgl');
   
   // Verify WebGL support
   if (!canvas.elt.getContext('webgl')) {
@@ -40,7 +42,7 @@ function setup() {
   initBubbles();
 }
 
-// ============== MAIN DRAW LOOP ==============
+// ============== RENDERING ==============
 function draw() {
   // Clear background
   background(0, 50, 100);
