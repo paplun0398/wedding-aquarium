@@ -1,3 +1,5 @@
+import Fish from "./components/fish/Fish";
+
 // ============== GLOBAL VARIABLES ==============
 let fishes = [], bubbles = [], corals = [];
 let oceanBg, coralImg, bubbleImg;
@@ -84,46 +86,46 @@ function updateFishCount() {
 }
 
 // ============== FISH CLASS ==============
-class Fish {
-  constructor(img) {
-    this.img = img;
-    this.size = random(80, 150);
-    this.reset();
-  }
+// class Fish {
+//   constructor(img) {
+//     this.img = img;
+//     this.size = random(80, 150);
+//     this.reset();
+//   }
   
-  reset() {
-    this.x = random(-width/2, width/2);
-    this.y = random(-height/2, height/2);
-    this.speed = random(0.5, 1.5);
-    this.angle = random(TWO_PI);
-    this.tailWiggle = 0;
-  }
+//   reset() {
+//     this.x = random(-width/2, width/2);
+//     this.y = random(-height/2, height/2);
+//     this.speed = random(0.5, 1.5);
+//     this.angle = random(TWO_PI);
+//     this.tailWiggle = 0;
+//   }
   
-  update() {
-    // Tail animation
-    this.tailWiggle = sin(frameCount * 0.2) * 10;
+//   update() {
+//     // Tail animation
+//     this.tailWiggle = sin(frameCount * 0.2) * 10;
     
-    // Movement
-    this.x += cos(this.angle) * this.speed;
-    this.y += sin(this.angle) * this.speed;
+//     // Movement
+//     this.x += cos(this.angle) * this.speed;
+//     this.y += sin(this.angle) * this.speed;
     
-    // Bounce off walls
-    if (abs(this.x) > width/2 || abs(this.y) > height/2) {
-      this.angle = atan2(-sin(this.angle), -cos(this.angle));
-    }
-  }
+//     // Bounce off walls
+//     if (abs(this.x) > width/2 || abs(this.y) > height/2) {
+//       this.angle = atan2(-sin(this.angle), -cos(this.angle));
+//     }
+//   }
   
-  display() {
-    push();
-    translate(this.x, this.y);
-    rotate(this.angle);
+//   display() {
+//     push();
+//     translate(this.x, this.y);
+//     rotate(this.angle);
     
-    imageMode(CENTER);
-    image(this.img, 0, 0, this.size, this.size * 0.4);
+//     imageMode(CENTER);
+//     image(this.img, 0, 0, this.size, this.size * 0.4);
     
-    pop();
-  }
-}
+//     pop();
+//   }
+// }
 
 // ============== BUBBLE CLASS ==============
 class Bubble {
