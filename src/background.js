@@ -57,7 +57,7 @@ function draw() {
     shader(rippleShader);
     rippleShader.setUniform('uTexture', oceanBg);
     rippleShader.setUniform('time', millis() / 1000);
-    plane(width * 2, height * 2);
+    plane(width * 2 + 2, height * 2 + 2);
     resetShader();
   } else {
     image(oceanBg, -width/2, -height/2, width * 2, height * 2);
@@ -82,7 +82,7 @@ class Bubble {
   reset() {
     this.x = random(-width/2, width/2);
     this.y = random(height/2, height/2 + 100);
-    this.size = random(5, 15);
+    this.size = random(5, 20);
     this.speed = random(1, 3);
   }
   
@@ -101,7 +101,7 @@ class Bubble {
 
 // ============== ENVIRONMENT FUNCTIONS ==============
 function initCorals() {
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < 6; i++) {
     corals.push({
       x: random(-width/2, width/2),
       y: height/2 - random(50, 200),
