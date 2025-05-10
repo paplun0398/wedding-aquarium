@@ -5,29 +5,39 @@ body {
     color: white;
     min-height: 100vh;
     box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #2989d8 0%, #2cd4d9 100%);
 }
 
 .upload-container {
     background: rgba(0, 0, 0, 0.5);
     padding: 25px;
     border-radius: 15px;
-    max-width: 500px;
-    margin: 0 auto;
+    width: 90%;
+    max-width: 400px;
     text-align: center;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(8px);
 }
 
 h1 {
     margin-top: 0;
+    margin-bottom: 20px;
     font-size: 24px;
 }
 
 #preview {
     max-width: 100%;
-    max-height: 300px;
-    margin: 20px auto;
+    max-height: 200px;
+    width: auto;
+    height: auto;
+    margin: 15px auto;
     display: none;
-    border-radius: 10px;
+    border-radius: 8px;
     border: 2px dashed rgba(255, 255, 255, 0.3);
+    object-fit: contain;
 }
 
 .upload-btn {
@@ -40,9 +50,7 @@ h1 {
     cursor: pointer;
     font-weight: bold;
     width: 100%;
-    max-width: 300px;
-    margin: 10px auto;
-    display: block;
+    margin: 10px 0;
     transition: all 0.3s;
 }
 
@@ -58,15 +66,21 @@ h1 {
 #status {
     margin-top: 15px;
     min-height: 20px;
+    font-size: 14px;
 }
 
 @media (max-width: 480px) {
     .upload-container {
         padding: 20px;
+        width: 85%;
     }
 
     h1 {
         font-size: 20px;
+    }
+
+    #preview {
+        max-height: 150px;
     }
 
     .upload-btn {
