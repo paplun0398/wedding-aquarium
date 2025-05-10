@@ -5,6 +5,7 @@ let rippleShader;
 let shaderReady = false;
 let canvas;
 let isWebGLSupported = true;
+let vertShaderSource, fragShaderSource;
 
 // ============== PRELOAD ASSETS ==============
 function preload() {
@@ -12,17 +13,9 @@ function preload() {
   coralImg = loadImage('./assets/backgrounds/coral.png');
   bubbleImg = loadImage('./assets/backgrounds/bubble.png');
   
-  // Load shaders
-  loadStrings('./assets/shaders/water.vert', vert => {
-    loadStrings('./assets/shaders/water.frag', frag => {
-      try {
-        rippleShader = createShader(vert.join('\n'), frag.join('\n'));
-        shaderReady = true;
-      } catch (err) {
-        console.error("Shader error:", err);
-      }
-    });
-  });
+  // Load shader sources
+  vertShaderSource = loadStrings('./assets/shaders/water.vert');
+  fragShaderSource = loadStrings('./assets/shaders/water.frag');
 }
 
 // ============== SETUP ==============
@@ -31,10 +24,22 @@ function setup() {
   isWebGLSupported = !!canvas.elt.getContext('webgl');
   
   // Verify WebGL support
-  if (!canvas.elt.getContext('webgl')) {
+  if (!isWebGLSupported) {
     console.error("WebGL not supported - using fallback");
     const fallbackMsg = createDiv("WebGL not supported - Some effects disabled");
     fallbackMsg.style('color', 'white').style('padding', '20px');
+  } else {
+    // Create shader only if WebGL is supported
+    try {
+      rippleShader = createShader(
+        vertShaderSource.join('\n'), 
+        fragShaderSource.join('\n')
+      );
+      shaderReady = true;
+    } catch (err) {
+      console.error("Shader error:", err);
+      shaderReady = false;
+    }
   }
   
   // Initialize environment
