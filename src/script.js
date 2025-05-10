@@ -1,4 +1,4 @@
-import Fish from "./components/fish/Fish";
+import Fish from "./components/fish/Fish.js";
 
 // ============== GLOBAL VARIABLES ==============
 let fishes = [], bubbles = [], corals = [];
