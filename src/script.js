@@ -30,20 +30,20 @@ class Fish {
     this.size = 150;
     this.parts = {
       "tail": {
-        "x": 0.2,
-        "y": 1.4,
-        "width": 2.2,
-        "height": 1.2,
-        "pivotX": 2.4,
-        "pivotY": 4.4
+        "x": 1690,
+        "y": 488,
+        "width": 508,
+        "height": 706,
+        "pivotX": 1682,
+        "pivotY": 810
       },
       "fin": {
-        "x": 3,
-        "y": 0.6,
-        "width": 4.9,
-        "height": 1.5,
-        "pivotX": 4.2,
-        "pivotY": 2.1
+        "x": 1184,
+        "y": 128,
+        "width": 470,
+        "height": 308,
+        "pivotX": 1182,
+        "pivotY": 318
       }
     };
     this.reset();
@@ -53,8 +53,8 @@ class Fish {
     this.x = random(-width / 2, width / 2);
     this.y = random(-height / 2, height / 2);
     this.speed = random(0.5, 2);
-    this.direction = 1; // 1=right
-    this.angle = 0; // Swimming direction (radians)
+    // this.direction = 1; // 1=right
+    // this.angle = 0; // Swimming direction (radians)
     this.isUpsideDown = false;
   }
 
