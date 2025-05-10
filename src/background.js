@@ -1,5 +1,5 @@
 // ============== GLOBAL VARIABLES ==============
-let bubbles = [], corals = [];
+let let fishes = [], bubbles = [], corals = [];
 let oceanBg, coralImg, bubbleImg;
 let rippleShader;
 let shaderReady = false;
