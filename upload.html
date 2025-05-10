@@ -12,7 +12,7 @@
     <img id="preview" alt="Fish preview">
     
     <input type="file" id="file-input" accept="image/*" capture="environment">
-    <button class="upload-btn" id="upload-btn">Chọn Ảnh</button>
+    <button class="upload-btn" id="upload-btn">Chụp Ảnh</button>
     <button class="upload-btn" id="submit-btn" style="display:none; background:#4CAF50; color:white;">Đăng</button>
     
     <p id="status"></p>
@@ -67,7 +67,7 @@
       if (!selectedFile) return;
       
       submitBtn.disabled = true;
-      status.textContent = "Uploading your fish...";
+      status.textContent = "Đang tải lên...";
       
       try {
         // Convert image to base64
@@ -79,7 +79,7 @@
           timestamp: Date.now()
         });
         
-        status.textContent = "Fish uploaded successfully!";
+        status.textContent = "Thành công!";
         preview.style.display = 'none';
         fileInput.value = '';
         submitBtn.style.display = 'none';
